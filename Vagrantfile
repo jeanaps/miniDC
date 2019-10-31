@@ -1,42 +1,57 @@
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
 Vagrant.configure("2") do |config|
 
-#Geral
-config.vm.box = "ubuntu/bionic64"
-#Máquina MiniDC-Database
-  config.vm.define "database" do |database|
-#    database.vm.box = "database"
-    database.vm.hostname = "database"
-    database.vm.network "private_network", ip: "172.17.177.21"
-    database.vm.provider "virtualbox" do |v|
+  config.vm.box = "ubuntu/bionic64"
+
+  ##VM1
+  config.vm.define "db" do |db|
+    db.vm.hostname = "database"
+    db.vm.network :private_network, ip: "172.17.177.21"
+    db.vm.provider :virtualbox do |v|
       v.name = "MiniDC-Database"
-      v.memory = 1024
-      v.cpus = 2
+      v.memory = 512
+      v.cpus = 1
     end
   end
 
-#Máquina MiniDC-Blog
-  config.vm.define "blog" do |blog|
-#    blog.vm.box = "blog"
-    blog.vm.hostname = "blog"
-    blog.vm.define "MiniDC-Blog"
-    blog.vm.network "private_network", ip: "172.17.177.22"
-    blog.vm.provider "virtualbox" do |v|
+  ##VM2
+  config.vm.define "web" do |web|
+    web.vm.hostname = "blog"
+    web.vm.network :private_network, ip: "172.17.177.22"
+    web.vm.provider :virtualbox do |v|
       v.name = "MiniDC-Blog"
-      v.memory = 1024
-      v.cpus = 2
+      v.memory = 512
+      v.cpus = 1
     end
   end
 
-#Máquina MiniDC
+  ##VM3
   config.vm.define "controller" do |controller|
-#    controller.vm.box = "controller"
     controller.vm.hostname = "controller"
-    controller.vm.define "MiniDC-AnsibleController"
-    controller.vm.network "private_network", ip: "172.17.177.11"
-    controller.vm.provider "virtualbox" do |v|
-      v.name = "MiniDC-Ansiblecontroller"
-      v.memory = 1024
-      v.cpus = 2
+    controller.vm.network :private_network, ip: "172.17.177.11"
+    
+    # Restringindo o permissionamento da pasta Vagrant
+    controller.vm.synced_folder "./", "/vagrant", mount_options: ["dmode=750,fmode=600"]
+
+    controller.vm.provider :virtualbox do |v|
+      v.name = "MiniDC-AnsibleController"
+      v.memory = 512
+      v.cpus = 1
+    end
+    ## Integrando o Ansible no Provisionamento
+    controller.vm.provision :ansible_local do |ansible|
+      ansible.install_mode = "default"
+      ansible.playbook = "playbook.yml"
+      ansible.inventory_path = "inventory"
+      ansible.verbose  = true
+      ansible.install  = true
+      ansible.limit    = "all"
     end
   end
+
 end
+
+
