@@ -6,3 +6,41 @@
     - name: Ajustando Timezone
       timezone:
         name: America/Sao_Paulo
+
+- hosts: controller
+  remote_user: vagrant
+  become: yes
+  tasks:
+    - name: Criando o Arquivo Info
+      lineinfile:
+        path: /tmp/info
+        create: yes
+        line: SERVIDOR ANSIBLE CONTROLLER
+        state: present
+        #regexp: '^SELINUX='
+        #line: SELINUX=enforcing
+
+- hosts: db
+  remote_user: vagrant
+  become: yes
+  tasks:
+    - name: Criando o Arquivo Info
+      lineinfile:
+        path: /tmp/info
+        create: yes
+        line: SERVIDOR DE BANCO DE DADOS MYSQL
+        state: present
+        
+- hosts: web
+  remote_user: vagrant
+  become: yes
+  tasks:
+    - name: Criando o Arquivo Info
+      lineinfile:
+        path: /tmp/info
+        create: yes
+        line: SERVIDOR DO BLOG WORDPRESS
+        state: present
+
+
+
