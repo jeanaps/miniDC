@@ -30,7 +30,11 @@
         create: yes
         line: SERVIDOR DE BANCO DE DADOS MYSQL
         state: present
-        
+    - name: Instalando MYSQL
+      apt:
+        state: present
+        pkg: 
+          - mysql-server
 - hosts: web
   remote_user: vagrant
   become: yes
@@ -41,6 +45,20 @@
         create: yes
         line: SERVIDOR DO BLOG WORDPRESS
         state: present
-
-
-
+    - name: Instalando MYSQL
+      apt:
+        state: present
+        update_cache: yes
+        pkg: 
+          - apache2
+          - php-curl
+          - php-gd
+          - php-mbstring
+          - php-xml
+          - php-xmlrpc
+          - php-soap
+          - php-intl
+          - php-zip
+          - php
+          - libapache2-mod-php
+          - php-mysql
