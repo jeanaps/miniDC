@@ -6,7 +6,6 @@
     - name: Ajustando Timezone
       timezone:
         name: America/Sao_Paulo
-
 - hosts: controller
   remote_user: vagrant
   become: yes
@@ -19,91 +18,32 @@
         state: present
         #regexp: '^SELINUX='
         #line: SELINUX=enforcing
-
-- hosts: db
+    #- name: Definindo a Senha de Administrador do MySQL
+      #debconf: name='mysql-server' question='mysql-server/root_password' value='123' vtype='password'
+- hosts: terraform
   remote_user: vagrant
   become: yes
   tasks:
-    - name: Criando o Arquivo Info
-      lineinfile:
-        path: /tmp/info
-        create: yes
-        line: SERVIDOR DE BANCO DE DADOS MYSQL
-        state: present
-    - name: Definindo a Senha de Administrador do MySQL
-      debconf: name='mysql-server' question='mysql-server/root_password' value='123' vtype='password'
+    - name: Unzip file download
+      unarchive:
+        src: https://releases.hashicorp.com/terraform/0.12.18/terraform_0.12.18_linux_amd64.zip
+        dest: /usr/local/bin/terraform
+        remote_src: yes
 
-    - name: Confirmando a Senha de Administrador do MySQL
-      debconf: name='mysql-server' question='mysql-server/root_password_again' value='123' vtype='password'
-    
-    - name: Instalando MYSQL
-      apt:
-        state: present
-        update_cache: yes
-        pkg: 
-          - mysql-server
-          - python-pymysql
 
-    - name: Criando a Base de Dados
-      mysql_db:
-        name: wordpress
-        state: present
-        login_user: root
-        login_password: 123
-
-    - name: Criando o usuário do Banco
-      mysql_user:
-        name: wordpress
-        password: impacta
-        priv: '*.*:ALL'
-        state: present
-        host: 172.17.177.22
-        login_user: root
-        login_password: 123
-    
-    - name: 
-      lineinfile:
-        path: /etc/mysql/mysql.conf.d/mysqld.cnf
-        regexp: '^bind-address'
-        line: bind-address = 0.0.0.0
-      notify:
-          - restart mysql
-      
-- hosts: web
-  remote_user: vagrant
-  become: yes
-  tasks:
-    - name: Criando o Arquivo Info
-      lineinfile:
-        path: /tmp/info
-        create: yes
-        line: SERVIDOR DO BLOG WORDPRESS
-        state: present
-    - name: Instalando Apache
-      apt:
-        state: present
-        update_cache: yes
-        pkg: 
-          - apache2
-          - php-curl
-          - php-gd
-          - php-mbstring
-          - php-xml
-          - php-xmlrpc
-          - php-soap
-          - php-intl
-          - php-zip
-          - php
-          - libapache2-mod-php
-          - php-mysql
-          - mysql-client
-  handlers:
-    - name: restart apache
-      service:
-        name: apache2
-        state: restarted
-
-    - name: restart mysql
-      service:
-        name: mysql
-        state: restarted
+#    - name: Baixando Terraform
+#        get_url:
+#        url: https://releases.hashicorp.com/terraform/0.12.18/terraform_0.12.18_linux_amd64.zip
+#        dest: /tmp/terraform
+#        mode: '0440'
+#    - name: Descompactando Download Terraform
+#        unarchive:
+#          src: /tmp/terraform
+#          dest: /usr/local/bin
+#          remote_src: yes
+#      apt:
+#        state: present
+#        update_cache: yes
+#        pkg: 
+#          - mysql-server
+#          - python-pymysql
